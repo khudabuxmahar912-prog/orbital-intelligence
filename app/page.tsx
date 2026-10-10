@@ -1,11 +1,11 @@
 'use client';
 import React, { useState } from 'react';
-import Header from '@/src/components/Header';
-import MapViewer from '@/src/components/MapViewer';
-import TimelinePlayer from '@/src/components/TimelinePlayer';
-import LiveLocationMap from '@/src/components/LiveLocationMap';
-import ReportModal from '@/src/components/ReportModal';
-import { generateIntelligenceReportData, GeospatialReportData } from '@/src/lib/reportGenerator';
+import Header from '../src/components/Header';
+import MapViewer from '../src/components/MapViewer';
+import TimelinePlayer from '../src/components/TimelinePlayer';
+import LiveLocationMap from '../src/components/LiveLocationMap';
+import ReportModal from '../src/components/ReportModal';
+import { generateIntelligenceReportData, GeospatialReportData } from '../src/lib/reportGenerator';
 
 export default function Home() {
   const [activeModule, setActiveModule] = useState<'satellite' | 'liveGPS'>('satellite');
@@ -19,7 +19,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-sky-500 selection:text-white">
-      {/* Sticky Branded Header (Acts like a bridge/wall) */}
+      {/* Branded Sticky Header */}
       <Header 
         activeModule={activeModule} 
         setActiveModule={setActiveModule} 
@@ -33,12 +33,18 @@ export default function Home() {
         {activeModule === 'satellite' && (
           <div className="flex flex-col gap-6">
             <div className="bg-slate-900/80 p-5 rounded-xl border border-slate-800 shadow-xl">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
                 <div>
                   <span className="text-xs font-bold text-sky-400 uppercase tracking-widest">Earth Observation System</span>
                   <h2 className="text-xl font-bold text-white">Global Surface Dynamics & Regional Change Detection</h2>
                   <p className="text-xs text-slate-400 mt-1">Multi-temporal Sentinel-2 satellite imagery analysis (2022–2026) — Active Year: {selectedYear}</p>
                 </div>
+                <button
+                  onClick={handleOpenReport}
+                  className="self-start sm:self-center px-3.5 py-2 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs rounded-lg shadow-lg transition-all flex items-center gap-1.5 whitespace-nowrap"
+                >
+                  📄 Generate Intelligence Report
+                </button>
               </div>
               <MapViewer />
             </div>
