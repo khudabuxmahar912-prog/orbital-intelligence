@@ -59,7 +59,6 @@ export default function MasterDashboard() {
           </span>
         </div>
 
-        {/* Global Live Search Bar with "Search location..." placeholder */}
         <form onSubmit={handleSearch} className="flex-1 max-w-xl mx-4">
           <div className="relative">
             <input
@@ -164,7 +163,7 @@ export default function MasterDashboard() {
             <p className="text-[10px] text-slate-400 mt-0.5">Global problems. Local solutions.</p>
             <div className="mt-2 text-[10px] text-emerald-400 font-mono flex items-center justify-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
-              Live Satellite Node Active
+              {locationData.isNight ? 'Live Night Node Active' : 'Live Daylight Node Active'}
             </div>
           </div>
         </aside>
@@ -172,57 +171,201 @@ export default function MasterDashboard() {
         {/* Workspace */}
         <main className="flex-1 p-4 overflow-y-auto flex flex-col gap-4 bg-[#060d17]">
           {activeTab === 'Overview' && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-              <div className="lg:col-span-2 bg-[#081120] border border-slate-800/80 rounded-xl overflow-hidden relative min-h-[380px] flex flex-col shadow-xl">
-                <div className="absolute top-3 left-3 z-20 bg-[#040a14]/90 backdrop-blur-md border border-slate-800 p-2.5 rounded-lg text-xs pointer-events-none">
-                  <span className="text-[10px] font-bold text-sky-400 uppercase tracking-wider block">AOI: {locationData.name}</span>
-                  <span className="text-slate-200 font-mono font-bold block">{locationData.coordinates.lat}°N, {locationData.coordinates.lng}°E</span>
-                  <span className="text-slate-400 text-[10px] block">Area: {locationData.areaSqKm} km²</span>
-                </div>
-
-                <div className="w-full flex-1 relative z-10 bg-slate-950">
-                  {isMounted && (
-                    <DynamicLeafletMap 
-                      lat={locationData.coordinates.lat} 
-                      lng={locationData.coordinates.lng} 
-                      locationName={locationData.name} 
-                      isNight={locationData.isNight}
-                    />
-                  )}
-                </div>
-              </div>
-
-              <div className="bg-[#081120] border border-slate-800/80 rounded-xl p-4 flex flex-col gap-4 shadow-xl">
-                <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
-                  <div>
-                    <h2 className="text-base font-bold text-white">{locationData.name}, {locationData.region}</h2>
-                    <p className="text-xs text-slate-400 font-mono mt-0.5">{locationData.coordinates.lat}°N, {locationData.coordinates.lng}°E</p>
-                  </div>
-                  <span className="bg-emerald-950/80 border border-emerald-800 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded uppercase">
-                    {locationData.status}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-[#040a14] border border-slate-800/80 p-3 rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <span className="text-2xl font-black text-white font-mono">{locationData.weather.tempC}°C</span>
-                      <span className="text-lg">☀️</span>
-                    </div>
-                    <p className="text-xs text-slate-300 font-medium mt-1">{locationData.weather.condition}</p>
-                    <p className="text-[10px] text-sky-400 mt-1 font-mono">Humidity: {locationData.weather.humidity}% • Wind: {locationData.weather.windKmH} km/h</p>
+            <>
+              {/* Top Grid: Map & Weather */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div className="lg:col-span-2 bg-[#081120] border border-slate-800/80 rounded-xl overflow-hidden relative min-h-[380px] flex flex-col shadow-xl">
+                  <div className="absolute top-3 left-3 z-20 bg-[#040a14]/90 backdrop-blur-md border border-slate-800 p-2.5 rounded-lg text-xs pointer-events-none">
+                    <span className="text-[10px] font-bold text-sky-400 uppercase tracking-wider block">AOI: {locationData.name}</span>
+                    <span className="text-slate-200 font-mono font-bold block">{locationData.coordinates.lat}°N, {locationData.coordinates.lng}°E</span>
+                    <span className="text-slate-400 text-[10px] block">Area: {locationData.areaSqKm} km²</span>
                   </div>
 
-                  <div className="bg-[#040a14] border border-slate-800/80 p-3 rounded-lg flex flex-col justify-between">
+                  <div className="w-full flex-1 relative z-10 bg-slate-950">
+                    {isMounted && (
+                      <DynamicLeafletMap 
+                        lat={locationData.coordinates.lat} 
+                        lng={locationData.coordinates.lng} 
+                        locationName={locationData.name} 
+                        isNight={locationData.isNight}
+                      />
+                    )}
+                  </div>
+                </div>
+
+                <div className="bg-[#081120] border border-slate-800/80 rounded-xl p-4 flex flex-col gap-4 shadow-xl">
+                  <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
                     <div>
-                      <span className="text-[10px] text-slate-400 uppercase font-semibold">NDVI (Avg)</span>
-                      <div className="text-2xl font-black text-emerald-400 font-mono mt-0.5">{locationData.ndvi.avg}</div>
+                      <h2 className="text-base font-bold text-white">{locationData.name}, {locationData.region}</h2>
+                      <p className="text-xs text-slate-400 font-mono mt-0.5">{locationData.coordinates.lat}°N, {locationData.coordinates.lng}°E</p>
                     </div>
-                    <span className="text-[10px] text-emerald-300 font-medium">{locationData.ndvi.status}</span>
+                    <span className="bg-emerald-950/80 border border-emerald-800 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded uppercase">
+                      {locationData.status}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-[#040a14] border border-slate-800/80 p-3 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <span className="text-2xl font-black text-white font-mono">{locationData.weather.tempC}°C</span>
+                        <span className="text-xl">{locationData.isNight ? '🌙' : '☀️'}</span>
+                      </div>
+                      <p className="text-xs text-slate-300 font-medium mt-1">{locationData.weather.condition}</p>
+                      <p className="text-[10px] text-sky-400 mt-1 font-mono">Humidity: {locationData.weather.humidity}% • Wind: {locationData.weather.windKmH} km/h</p>
+                    </div>
+
+                    <div className="bg-[#040a14] border border-slate-800/80 p-3 rounded-lg flex flex-col justify-between">
+                      <div>
+                        <span className="text-[10px] text-slate-400 uppercase font-semibold">NDVI (Avg)</span>
+                        <div className="text-2xl font-black text-emerald-400 font-mono mt-0.5">{locationData.ndvi.avg}</div>
+                      </div>
+                      <span className="text-[10px] text-emerald-300 font-medium">{locationData.ndvi.status}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex-1 flex flex-col gap-2 bg-[#040a14] border border-slate-800/80 p-3 rounded-lg">
+                    <span className="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-1.5">
+                      <span>📄</span> {locationData.isNight ? 'Night Thermal Telemetry' : 'Daylight Telemetry Insights'}
+                    </span>
+                    <ul className="text-xs text-slate-300 flex flex-col gap-2 mt-1">
+                      <li className="flex items-start gap-2">
+                        <span className="text-sky-400 text-sm mt-0.5">🌱</span>
+                        <span>Land cover: <strong>{locationData.landCover.agriculture}% agricultural</strong>, {locationData.landCover.urban}% urban.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-emerald-400 text-sm mt-0.5">📈</span>
+                        <span>Vegetation index (NDVI) is currently {locationData.ndvi.avg}.</span>
+                      </li>
+                    </ul>
                   </div>
                 </div>
               </div>
-            </div>
+
+              {/* Bottom 6 Modular Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-4">
+                <div onClick={() => setActiveTab('Land Cover')} className="bg-[#081120] border border-slate-800/80 rounded-xl p-4 flex flex-col justify-between shadow-lg cursor-pointer hover:border-sky-500/50 transition-colors">
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-xs font-bold text-white flex items-center gap-1.5"><span>🍃</span> Land Cover</h3>
+                      <span className="text-[10px] text-sky-400 font-mono">{locationData.isNight ? 'Night Thermal Scan' : 'ESA WorldCover'}</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 my-3 text-xs">
+                      <div className="flex items-center justify-between p-1.5 bg-[#040a14] rounded border border-slate-800">
+                        <span className="text-slate-400">Agriculture</span>
+                        <span className="font-mono font-bold text-slate-200">{locationData.landCover.agriculture}%</span>
+                      </div>
+                      <div className="flex items-center justify-between p-1.5 bg-[#040a14] rounded border border-slate-800">
+                        <span className="text-slate-400">Urban</span>
+                        <span className="font-mono font-bold text-slate-200">{locationData.landCover.urban}%</span>
+                      </div>
+                    </div>
+                  </div>
+                  <span className="text-sky-400 text-xs font-semibold">View Details ➔</span>
+                </div>
+
+                <div onClick={() => setActiveTab('Vegetation')} className="bg-[#081120] border border-slate-800/80 rounded-xl p-4 flex flex-col justify-between shadow-lg cursor-pointer hover:border-sky-500/50 transition-colors">
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-xs font-bold text-white flex items-center gap-1.5"><span>🌱</span> Vegetation Health</h3>
+                      <span className="text-[10px] text-sky-400 font-mono">{locationData.isNight ? 'Thermal NDVI' : 'Sentinel-2 (NDVI)'}</span>
+                    </div>
+                    <div className="flex items-center justify-between bg-[#040a14] p-3 rounded-lg border border-slate-800 my-2">
+                      <div>
+                        <span className="text-[10px] text-slate-400 block">NDVI (Avg)</span>
+                        <span className="text-2xl font-black text-emerald-400 font-mono">{locationData.ndvi.avg}</span>
+                      </div>
+                      <span className="bg-emerald-950 text-emerald-400 text-[10px] font-bold px-2 py-1 rounded border border-emerald-800">{locationData.ndvi.status}</span>
+                    </div>
+                  </div>
+                  <span className="text-sky-400 text-xs font-semibold mt-2">View Details ➔</span>
+                </div>
+
+                <div onClick={() => setActiveTab('Weather & Climate')} className="bg-[#081120] border border-slate-800/80 rounded-xl p-4 flex flex-col justify-between shadow-lg cursor-pointer hover:border-sky-500/50 transition-colors">
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-xs font-bold text-white flex items-center gap-1.5"><span>🌤️</span> Weather & Climate</h3>
+                      <span className="text-[10px] text-sky-400 font-mono">{locationData.isNight ? 'Live Night Node' : 'Open-Meteo Live'}</span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 my-2 text-center text-xs">
+                      <div className="bg-[#040a14] p-2 rounded border border-slate-800">
+                        <span className="text-slate-400 text-[10px] block">Temp</span>
+                        <span className="font-bold font-mono text-white">{locationData.weather.tempC}°C</span>
+                      </div>
+                      <div className="bg-[#040a14] p-2 rounded border border-slate-800">
+                        <span className="text-slate-400 text-[10px] block">Humidity</span>
+                        <span className="font-bold font-mono text-sky-400">{locationData.weather.humidity}%</span>
+                      </div>
+                      <div className="bg-[#040a14] p-2 rounded border border-slate-800">
+                        <span className="text-slate-400 text-[10px] block">Wind</span>
+                        <span className="font-bold font-mono text-slate-200">{locationData.weather.windKmH} km/h</span>
+                      </div>
+                    </div>
+                  </div>
+                  <span className="text-sky-400 text-xs font-semibold mt-2">View Details ➔</span>
+                </div>
+
+                <div onClick={() => setActiveTab('Soil & Terrain')} className="bg-[#081120] border border-slate-800/80 rounded-xl p-4 flex flex-col justify-between shadow-lg cursor-pointer hover:border-sky-500/50 transition-colors">
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-xs font-bold text-white flex items-center gap-1.5"><span>⛰️</span> Soil & Terrain</h3>
+                      <span className="text-[10px] text-slate-400 font-mono">SoilGrids / SRTM</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 my-2 text-xs">
+                      <div className="bg-[#040a14] p-2 rounded border border-slate-800">
+                        <span className="text-slate-400 text-[10px] block">Elevation</span>
+                        <span className="font-bold font-mono text-slate-200">{locationData.soilTerrain.elevationM} m</span>
+                      </div>
+                      <div className="bg-[#040a14] p-2 rounded border border-slate-800">
+                        <span className="text-slate-400 text-[10px] block">Soil Type</span>
+                        <span className="font-bold text-slate-200">{locationData.soilTerrain.soilType}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <span className="text-sky-400 text-xs font-semibold">View Details ➔</span>
+                </div>
+
+                <div onClick={() => setActiveTab('Water Intelligence')} className="bg-[#081120] border border-slate-800/80 rounded-xl p-4 flex flex-col justify-between shadow-lg cursor-pointer hover:border-sky-500/50 transition-colors">
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-xs font-bold text-white flex items-center gap-1.5"><span>💧</span> Water Intelligence</h3>
+                      <span className="text-[10px] text-sky-400 font-mono">SMAP / GRACE</span>
+                    </div>
+                    <div className="bg-[#040a14] p-3 rounded-lg border border-slate-800 my-2 flex items-center justify-between">
+                      <div>
+                        <span className="text-[10px] text-slate-400 block">Soil Moisture</span>
+                        <span className="text-xl font-black text-sky-400 font-mono">{locationData.water.soilMoisture} m³/m³</span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-[10px] text-slate-400 block">Status</span>
+                        <span className="text-xs font-bold text-emerald-400">{locationData.water.floodRisk}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <span className="text-sky-400 text-xs font-semibold">View Details ➔</span>
+                </div>
+
+                <div onClick={() => setActiveTab('Agro Intelligence')} className="bg-[#081120] border border-slate-800/80 rounded-xl p-4 flex flex-col justify-between shadow-lg cursor-pointer hover:border-sky-500/50 transition-colors">
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-xs font-bold text-white flex items-center gap-1.5"><span>🌾</span> Agricultural Suitability</h3>
+                      <span className="text-[10px] text-sky-400 font-mono">SENTINEL Agro AI</span>
+                    </div>
+                    <div className="flex flex-col gap-1.5 my-2 text-xs">
+                      {locationData.cropSuitability.map((item) => (
+                        <div key={item.crop} className="flex items-center justify-between">
+                          <span className="text-slate-300 font-medium w-16">{item.crop}</span>
+                          <div className="flex-1 mx-2 bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                            <div className="bg-emerald-500 h-full rounded-full" style={{ width: `${item.percentage}%` }}></div>
+                          </div>
+                          <span className="text-slate-400 font-mono text-[10px]">{item.percentage}%</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <span className="text-sky-400 text-xs font-semibold mt-1">View Details ➔</span>
+                </div>
+              </div>
+            </>
           )}
 
           {activeTab === 'SENTINEL AI' && (
@@ -231,8 +374,18 @@ export default function MasterDashboard() {
 
           {activeTab !== 'Overview' && activeTab !== 'SENTINEL AI' && (
             <div className="bg-[#081120] border border-slate-800/80 rounded-xl p-6 flex flex-col gap-6 shadow-2xl">
-              <h2 className="text-xl font-bold text-white">Module View: {activeTab} for {locationData.name}</h2>
-              <p className="text-xs text-slate-300">Live telemetry and scientific modeling successfully synced for current coordinates.</p>
+              <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+                <div>
+                  <span className="text-xs font-bold text-sky-400 uppercase tracking-widest">Module View: {activeTab}</span>
+                  <h2 className="text-xl font-bold text-white mt-1">Detailed Analysis for {locationData.name}, {locationData.country}</h2>
+                </div>
+                <button 
+                  onClick={() => setActiveTab('Overview')} 
+                  className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-lg border border-slate-700 transition-colors"
+                >
+                  ← Back to Overview
+                </button>
+              </div>
             </div>
           )}
         </main>

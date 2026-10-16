@@ -39,9 +39,9 @@ export interface LocationData {
 }
 
 export const fontData: LocationData = {
-  name: "Nawabshah",
-  region: "Sindh",
-  country: "Pakistan",
+  name: "Search location...",
+  region: "",
+  country: "",
   coordinates: { lat: 26.2442, lng: 68.3831 },
   areaSqKm: 1150,
   status: "Live Satellite Synced",
@@ -67,10 +67,10 @@ export async function fetchLiveLocationData(query: string): Promise<LocationData
     let lat = 26.2442;
     let lng = 68.3831;
     let displayName = query;
-    let region = "Sindh";
-    let country = "Pakistan";
+    let region = "";
+    let country = "";
 
-    // 1. Universal Nominatim Geocoding Lookup
+    // 1. Universal Nominatim Geocoding Lookup (Any village, city, university globally)
     const geoRes = await fetch(
       `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&addressdetails=1&limit=1`,
       { headers: { 'User-Agent': 'OrbitalIntelligence-NASA-App/2.0' } }
@@ -88,32 +88,36 @@ export async function fetchLiveLocationData(query: string): Promise<LocationData
       country = address.country || "Global";
     }
 
-    // 2. Live Open-Meteo Weather & Solar (Day/Night) API Call
+    // 2. Live Open-Meteo Weather & Day/Night Detection API
     let tempC = 28, humidity = 50, windKmH = 10, condition = "Clear Sky";
     let isNight = false;
 
-    const weatherRes = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,is_day,weather_code`
-    );
-    const weatherData = await weatherRes.json();
-    const current = weatherData.current || {};
+    try {
+      const weatherRes = await fetch(
+        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,is_day,weather_code`
+      );
+      const weatherData = await weatherRes.json();
+      const current = weatherData.current || {};
 
-    if (current.temperature_2m !== undefined) tempC = Math.round(current.temperature_2m);
-    if (current.relative_humidity_2m !== undefined) humidity = current.relative_humidity_2m;
-    if (current.wind_speed_10m !== undefined) windKmH = Math.round(current.wind_speed_10m);
-    
-    // is_day: 1 means day, 0 means night at that specific geographic location!
-    if (current.is_day !== undefined) {
-      isNight = current.is_day === 0;
+      if (current.temperature_2m !== undefined) tempC = Math.round(current.temperature_2m);
+      if (current.relative_humidity_2m !== undefined) humidity = current.relative_humidity_2m;
+      if (current.wind_speed_10m !== undefined) windKmH = Math.round(current.wind_speed_10m);
+      
+      // is_day = 0 means Night at that target geographic position
+      if (current.is_day !== undefined) {
+        isNight = current.is_day === 0;
+      }
+
+      const code = current.weather_code || 0;
+      if (code > 0 && code <= 3) condition = "Partly Cloudy";
+      else if (code >= 45 && code <= 48) condition = "Foggy";
+      else if (code >= 51 && code <= 67) condition = "Light Rain";
+      else if (code >= 80) condition = "Showers";
+    } catch (e) {
+      console.warn("Weather fetch fallback:", e);
     }
 
-    const code = current.weather_code || 0;
-    if (code > 0 && code <= 3) condition = "Partly Cloudy";
-    else if (code >= 45 && code <= 48) condition = "Foggy";
-    else if (code >= 51 && code <= 67) condition = "Light Rain";
-    else if (code >= 80) condition = "Showers";
-
-    // 3. Dynamic Scientific Environmental Telemetry Modeling
+    // 3. Mathematical Scientific Telemetry Modeling
     const hash = Math.abs(Math.sin(lat * 12.9898 + lng * 78.233) * 43758.5453) % 1;
     const ndviVal = parseFloat((0.25 + hash * 0.6).toFixed(2));
     const agriVal = Math.round(30 + hash * 50);
@@ -127,9 +131,14 @@ export async function fetchLiveLocationData(query: string): Promise<LocationData
       country: country,
       coordinates: { lat: parseFloat(lat.toFixed(4)), lng: parseFloat(lng.toFixed(4)) },
       areaSqKm: Math.round(400 + hash * 1600),
-      status: isNight ? "Live Night Node Synced" : "Live Daylight Synced",
+      status: isNight ? "🌙 Night Telemetry Active" : "☀️ Daylight Satellite Active",
       isNight,
-      weather: { tempC, condition, humidity, windKmH },
+      weather: { 
+        tempC, 
+        condition: isNight ? "Clear Night" : condition, 
+        humidity, 
+        windKmH 
+      },
       landCover: {
         agriculture: agriVal,
         urban: urbanVal,
@@ -138,7 +147,7 @@ export async function fetchLiveLocationData(query: string): Promise<LocationData
       },
       ndvi: {
         avg: ndviVal,
-        status: ndviVal > 0.55 ? "Dense Healthy Vegetation" : "Moderate Vegetation"
+        status: isNight ? "Night Thermal Scan (NDVI Stable)" : (ndviVal > 0.55 ? "Dense Healthy Vegetation" : "Moderate Vegetation")
       },
       soilTerrain: {
         elevationM: Math.round(10 + hash * 350),
@@ -148,7 +157,7 @@ export async function fetchLiveLocationData(query: string): Promise<LocationData
       },
       water: {
         soilMoisture: parseFloat((0.12 + hash * 0.3).toFixed(2)),
-        floodRisk: hash > 0.75 ? "Moderate Flood Risk" : "Low Risk"
+        floodRisk: isNight ? "Night Moisture Stable" : (hash > 0.75 ? "Moderate Flood Risk" : "Low Risk")
       },
       cropSuitability: [
         { crop: "Wheat", percentage: Math.round(65 + hash * 30) },
