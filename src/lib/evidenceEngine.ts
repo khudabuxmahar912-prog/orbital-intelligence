@@ -213,33 +213,38 @@ export async function fetchLiveLocationData(query: string): Promise<LocationData
     const soilReason = `Topographical terrain elevation of ${Math.round(10 + hash * 350)}m combined with ${hash > 0.5 ? "Alluvial Silt Loam" : "Sandy Loam"} soil controls drainage velocity and nutrient exchange.`;
     const waterReason = `Topsoil volumetric water content (${soilMoistureVal} m³/m³) reflects root-zone water balance regulated by local soil retention and evapotranspiration.`;
 
-    // 6. Dynamic Risk Alert Engine Logic
-    let riskAlert: { level: 'CRITICAL' | 'WARNING' | 'NORMAL'; title: string; description: string } = {
-      level: 'NORMAL',
-      title: 'ENVIRONMENTAL STATUS STABLE',
-      description: `Optimal micro-climatic conditions detected for ${displayName}. No severe heatwave or drought alerts in effect.`
-    };
+    
+    // 6. Enhanced Dynamic Risk Alert Engine Logic
+let riskAlert: { level: 'CRITICAL' | 'WARNING' | 'NORMAL'; title: string; description: string } = {
+  level: 'NORMAL',
+  title: 'ENVIRONMENTAL STATUS STABLE',
+  description: `Optimal micro-climatic conditions detected for ${displayName}. No severe thermal or drought warnings in effect.`
+};
 
-    if (tempC >= 36 || (tempC >= 30 && humidity < 25)) {
-      riskAlert = {
-        level: 'CRITICAL',
-        title: '🔥 EXTREME HEATWAVE & THERMAL CROP STRESS',
-        description: `High surface temperature (${tempC}°C) and low atmospheric humidity (${humidity}%) signal severe evapotranspiration risk for crops in ${displayName}.`
-      };
-    } else if (agriVal > 50 && soilMoistureVal < 0.18) {
-      riskAlert = {
-        level: 'WARNING',
-        title: '⚠️ AGRICULTURAL DROUGHT & MOISTURE DEFICIT',
-        description: `Sub-surface soil moisture (${soilMoistureVal} m³/m³) is below optimal thresholds. Supplemental canal irrigation recommended within 48 hours in ${displayName}.`
-      };
-    } else if (humidity > 80 && condition.includes('Rain')) {
-      riskAlert = {
-        level: 'WARNING',
-        title: '🌧️ HYDROLOGICAL RUNOFF & SATURATION ALERT',
-        description: `Elevated atmospheric humidity combined with precipitation increases flash runoff probability in low-elevation sectors in ${displayName}.`
-      };
-    }
-
+// Check for Arid Desert / High Temperature or Daytime Extremes
+if (tempC >= 34 || (tempC >= 28 && humidity < 30) || (isArid && tempC > 27)) {
+  riskAlert = {
+    level: 'CRITICAL',
+    title: '🔥 EXTREME HEATWAVE & THERMAL CROP STRESS',
+    description: `High surface temperature (${tempC}°C) and low humidity (${humidity}%) signal severe evapotranspiration risk for crops in ${displayName}.`
+  };
+} 
+// Check for Drought / Soil Moisture Deficit
+else if (soilMoistureVal < 0.22 || (agriVal > 40 && barrenVal > 20)) {
+  riskAlert = {
+    level: 'WARNING',
+    title: '⚠️ AGRICULTURAL DROUGHT & MOISTURE DEFICIT',
+    description: `Sub-surface soil moisture (${soilMoistureVal} m³/m³) is below optimal thresholds in ${displayName}. Supplemental canal irrigation recommended.`
+  };
+} 
+// Check for High Humidity / Rain / Runoff
+else if (humidity > 70 || condition.includes('Rain') || condition.includes('Showers')) {
+  riskAlert = {
+    level: 'WARNING',
+    title: '🌧️ HYDROLOGICAL RUNOFF & SATURATION ALERT',
+    description: `Elevated atmospheric humidity (${humidity}%) increases flash runoff probability in low-elevation sectors in ${displayName}.`
+  };
+}
     return {
       name: displayName,
       region: region,
