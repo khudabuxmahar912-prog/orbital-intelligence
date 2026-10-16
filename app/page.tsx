@@ -60,7 +60,7 @@ export default function MasterDashboard() {
     <div className="flex items-center gap-2.5">
       {/* 1. Sentinel-X Official Logo */}
       <img 
-        src="/logo.png" 
+        src="/logo.jpeg" 
         alt="Orbital Intelligence Logo" 
         className="w-9 h-9 rounded-full object-cover border border-sky-400/40 shadow-sm shadow-sky-500/20" 
       />
@@ -100,7 +100,7 @@ export default function MasterDashboard() {
   <div className="flex items-center gap-3 border-l border-slate-800 pl-3">
     {/* 2. Khuda Bux Profile Picture */}
     <img 
-      src="/profile.png" 
+      src="/profile.jpeg" 
       alt="Khuda Bux Mahar" 
       className="w-8 h-8 rounded-full object-cover border border-sky-400/50 shadow-md"
     />
