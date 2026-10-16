@@ -192,15 +192,15 @@ export default function MasterDashboard() {
                   </div>
 
                   {/* Dynamic Real Satellite Map with Marker */}
-<div className="w-full flex-1 relative z-10 bg-slate-950">
+               <div className="w-full flex-1 relative z-10 bg-slate-950 overflow-hidden">
   <iframe
     title="Sentinel-X Satellite Canvas"
     width="100%"
     height="100%"
     frameBorder="0"
-    scrolling="no"
+    scrolling="yes"
     src={`https://maps.google.com/maps?q=${locationData.coordinates.lat},${locationData.coordinates.lng}&z=13&t=k&output=embed`}
-    className="w-full h-full filter contrast-[1.05] brightness-[0.95]"
+    className="w-full h-full filter contrast-[1.05] brightness-[0.95] pointer-events-auto"
   ></iframe>
 </div>
                 </div>
