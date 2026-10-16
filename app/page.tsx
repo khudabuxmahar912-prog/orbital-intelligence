@@ -8,10 +8,10 @@ export default function MasterDashboard() {
   const [searchQuery, setSearchQuery] = useState('Ghotki, Sindh, Pakistan');
 
   return (
-    <div className="min-h-screen bg-[#060d17] text-slate-100 flex flex-col font-sans selection:bg-sky-500 selection:text-white">
+    <div className="h-screen w-screen bg-[#060d17] text-slate-100 flex flex-col font-sans overflow-hidden selection:bg-sky-500 selection:text-white">
       
-      {/* Top Header Navigation */}
-      <header className="w-full bg-[#0a1526] border-b border-slate-800/80 px-4 py-2.5 flex items-center justify-between gap-4 sticky top-0 z-50 shadow-md">
+      {/* 1. Fixed Top Header */}
+      <header className="w-full bg-[#0a1526] border-b border-slate-800/80 px-4 py-2.5 flex items-center justify-between gap-4 shrink-0 z-50 shadow-md">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-400/30 flex items-center justify-center text-sky-400 font-bold">
@@ -57,8 +57,8 @@ export default function MasterDashboard() {
         </div>
       </header>
 
-      {/* Horizontal Nav Bar */}
-      <nav className="bg-[#081120] border-b border-slate-800/80 px-4 py-1.5 flex items-center gap-1 overflow-x-auto scrollbar-none text-xs">
+      {/* 2. Fixed Horizontal Nav Bar */}
+      <nav className="bg-[#081120] border-b border-slate-800/80 px-4 py-1.5 flex items-center gap-1 overflow-x-auto scrollbar-none text-xs shrink-0 z-40">
         {[
           'Overview', 'Explore Earth', 'Global Location Intelligence', 'Land Cover', 
           'Vegetation', 'Weather & Climate', 'Soil & Terrain', 'Water Intelligence', 
@@ -79,11 +79,11 @@ export default function MasterDashboard() {
         ))}
       </nav>
 
-      {/* Main Body Layout */}
+      {/* Main Container with Independent Scrolling */}
       <div className="flex-1 flex overflow-hidden">
         
-        {/* Left Sidebar */}
-        <aside className="w-60 bg-[#081120] border-r border-slate-800/80 p-3 hidden md:flex flex-col gap-4 overflow-y-auto">
+        {/* 3. Fixed Left Sidebar */}
+        <aside className="w-60 bg-[#081120] border-r border-slate-800/80 p-3 hidden md:flex flex-col gap-4 shrink-0 overflow-y-auto">
           <div>
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2">Location Intelligence</span>
             <div className="bg-[#060d17] border border-slate-800 p-2 rounded-lg text-xs flex items-center justify-between">
@@ -137,8 +137,8 @@ export default function MasterDashboard() {
           </div>
         </aside>
 
-        {/* Center Workspace */}
-        <main className="flex-1 p-4 overflow-y-auto flex flex-col gap-4">
+        {/* 4. Scrollable Center Workspace (Map & Cards) */}
+        <main className="flex-1 p-4 overflow-y-auto flex flex-col gap-4 bg-[#060d17]">
           
           {/* Top Section: Map & Right Panel */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -261,7 +261,7 @@ export default function MasterDashboard() {
           </div>
 
           {/* Bottom Grid: 6 Modular Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-4">
             
             {/* Card 1: Land Cover */}
             <div className="bg-[#081120] border border-slate-800/80 rounded-xl p-4 flex flex-col justify-between shadow-lg">
@@ -429,12 +429,6 @@ export default function MasterDashboard() {
         </main>
 
       </div>
-
-      {/* Footer */}
-      <footer className="bg-[#040912] border-t border-slate-800/80 px-4 py-2 text-center text-[11px] text-slate-500 flex flex-col sm:flex-row justify-between items-center gap-2">
-        <p>© 2026 ORBITAL INTELLIGENCE — SENTINEL-X. Built for NASA Space Apps Challenge.</p>
-        <p>Created by <span className="text-slate-300 font-semibold">Khuda Bux Mahar</span> (Founder & Developer)</p>
-      </footer>
 
     </div>
   );
