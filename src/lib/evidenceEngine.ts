@@ -222,7 +222,7 @@ let riskAlert: { level: 'CRITICAL' | 'WARNING' | 'NORMAL'; title: string; descri
 };
 
 // Check for Arid Desert / High Temperature or Daytime Extremes
-if (tempC >= 34 || (tempC >= 28 && humidity < 30) || (isArid && tempC > 27)) {
+if (tempC >= 34 || (tempC >= 20 && humidity < 30) || (isArid && tempC > 27)) {
   riskAlert = {
     level: 'CRITICAL',
     title: '🔥 EXTREME HEATWAVE & THERMAL CROP STRESS',
