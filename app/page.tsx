@@ -1,14 +1,30 @@
 'use client';
 import React, { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { fontData, fetchLiveLocationData, LocationData } from '../src/lib/evidenceEngine';
 import SentinelAIAnalyst from '../src/components/SentinelAIAnalyst';
+
+// Dynamically import Leaflet map component to prevent SSR window/document reference issues in Next.js
+const DynamicLeafletMap = dynamic(() => import('../src/components/LeafletMap'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-full flex items-center justify-center bg-slate-950 text-sky-400 font-mono text-xs">
+      🛰️ Loading Real Satellite Canvas...
+    </div>
+  ),
+});
 
 export default function MasterDashboard() {
   const [activeTab, setActiveTab] = useState('Overview');
   const [activeLayer, setActiveLayer] = useState('Satellite Imagery');
-  const [searchQuery, setSearchQuery] = useState('Ghotki, Sindh, Pakistan');
+  const [searchQuery, setSearchQuery] = useState('Quaid-e-Awam University, Nawabshah');
   const [locationData, setLocationData] = useState<LocationData>(fontData);
   const [isSearching, setIsSearching] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Auto-Detect Location Data on Search Submit
   const handleSearch = async (e: React.FormEvent) => {
@@ -45,15 +61,15 @@ export default function MasterDashboard() {
           </span>
         </div>
 
-        {/* Global Live Search Bar */}
-        <form onSubmit={handleSearch} className="flex-1 max-w-md mx-4">
+        {/* Global Live Search Bar (Fixed Overflow & Text Truncate) */}
+        <form onSubmit={handleSearch} className="flex-1 max-w-xl mx-4">
           <div className="relative">
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search ANY world location (e.g. Karachi, Cairo, London, Ghotki)..."
-              className="w-full bg-[#060e1a] border border-sky-500/50 rounded-lg pl-3 pr-10 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-sky-400 font-mono shadow-inner transition-colors"
+              placeholder="Search ANY world location, village, or university..."
+              className="w-full bg-[#060e1a] border border-sky-500/50 rounded-lg pl-3 pr-10 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-sky-400 font-mono shadow-inner transition-colors truncate"
             />
             <button 
               type="submit" 
@@ -163,11 +179,14 @@ export default function MasterDashboard() {
           {/* Overview Tab */}
           {activeTab === 'Overview' && (
             <>
-              {/* Top Section: Map & Right Panel */}
+              {/* Top Section: Satellite Map & Right Panel */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                
+                {/* Leaflet Real Satellite Map Container */}
                 <div className="lg:col-span-2 bg-[#081120] border border-slate-800/80 rounded-xl overflow-hidden relative min-h-[380px] flex flex-col shadow-xl">
-                  <div className="absolute top-3 left-3 z-20 bg-[#040a14]/90 backdrop-blur-md border border-slate-800 p-2.5 rounded-lg text-xs">
-                    <span className="text-[10px] font-bold text-sky-400 uppercase tracking-wider block">AOI: {locationData.name} Region</span>
+                  
+                  <div className="absolute top-3 left-3 z-20 bg-[#040a14]/90 backdrop-blur-md border border-slate-800 p-2.5 rounded-lg text-xs pointer-events-none">
+                    <span className="text-[10px] font-bold text-sky-400 uppercase tracking-wider block">AOI: {locationData.name}</span>
                     <span className="text-slate-200 font-mono font-bold block">{locationData.coordinates.lat}°N, {locationData.coordinates.lng}°E</span>
                     <span className="text-slate-400 text-[10px] block">Area: {locationData.areaSqKm} km²</span>
                   </div>
@@ -191,18 +210,15 @@ export default function MasterDashboard() {
                     ))}
                   </div>
 
-                  {/* Dynamic Real Satellite Map with Marker */}
-               <div className="w-full flex-1 relative z-10 bg-slate-950 overflow-hidden">
-  <iframe
-    title="Sentinel-X Satellite Canvas"
-    width="100%"
-    height="100%"
-    frameBorder="0"
-    scrolling="yes"
-    src={`https://maps.google.com/maps?q=${locationData.coordinates.lat},${locationData.coordinates.lng}&z=13&t=k&output=embed`}
-    className="w-full h-full filter contrast-[1.05] brightness-[0.95] pointer-events-auto"
-  ></iframe>
-</div>
+                  <div className="w-full flex-1 relative z-10 bg-slate-950">
+                    {isMounted && (
+                      <DynamicLeafletMap 
+                        lat={locationData.coordinates.lat} 
+                        lng={locationData.coordinates.lng} 
+                        locationName={locationData.name} 
+                      />
+                    )}
+                  </div>
                 </div>
 
                 {/* Right Panel with Live Weather Metrics */}
@@ -217,7 +233,6 @@ export default function MasterDashboard() {
                     </span>
                   </div>
 
-                  {/* Weather & NDVI Quick Row */}
                   <div className="grid grid-cols-2 gap-3">
                     <div className="bg-[#040a14] border border-slate-800/80 p-3 rounded-lg">
                       <div className="flex items-center justify-between">
@@ -237,7 +252,6 @@ export default function MasterDashboard() {
                     </div>
                   </div>
 
-                  {/* Quick Insights List */}
                   <div className="flex-1 flex flex-col gap-2 bg-[#040a14] border border-slate-800/80 p-3 rounded-lg">
                     <span className="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-1.5">
                       <span>📄</span> Live Telemetry Insights
