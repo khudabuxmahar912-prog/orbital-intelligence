@@ -53,9 +53,9 @@ export interface LocationData {
 }
 
 export const fontData: LocationData = {
-  name: "Nawabshah",
-  region: "Sindh",
-  country: "Pakistan",
+  name: "Search City or country....",
+  region: "",
+  country: "",
   coordinates: { lat: 26.2442, lng: 68.3831 },
   areaSqKm: 1150,
   status: "Live Satellite Synced",
