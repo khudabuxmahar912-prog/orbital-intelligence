@@ -55,55 +55,61 @@ export default function MasterDashboard() {
     <div className="h-screen w-screen bg-[#060d17] text-slate-100 flex flex-col font-sans overflow-hidden selection:bg-sky-500 selection:text-white">
       
       {/* Top Header */}
-      <header className="w-full bg-[#0a1526] border-b border-slate-800/80 px-4 py-2.5 flex items-center justify-between gap-4 shrink-0 z-50 shadow-md">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-400/30 flex items-center justify-center text-sky-400 font-bold">
-              🌐
-            </div>
-            <div>
-              <h1 className="text-sm font-black tracking-wider text-white font-mono uppercase">
-                ORBITAL INTELLIGENCE
-              </h1>
-              <p className="text-[10px] text-sky-400 font-semibold tracking-wide">
-                Powered by <span className="text-slate-200">SENTINEL-X</span>
-              </p>
-            </div>
-          </div>
-          <span className="hidden xl:inline text-xs text-slate-400 border-l border-slate-700 pl-3 italic">
-            See the change. Understand the risk. Act before it escalates.
-          </span>
-        </div>
+<header className="w-full bg-[#0a1526] border-b border-slate-800/80 px-4 py-2.5 flex items-center justify-between gap-4 shrink-0 z-50 shadow-md">
+  <div className="flex items-center gap-3">
+    <div className="flex items-center gap-2.5">
+      {/* 1. Sentinel-X Official Logo */}
+      <img 
+        src="/logo.png" 
+        alt="Orbital Intelligence Logo" 
+        className="w-9 h-9 rounded-full object-cover border border-sky-400/40 shadow-sm shadow-sky-500/20" 
+      />
+      <div>
+        <h1 className="text-sm font-black tracking-wider text-white font-mono uppercase">
+          ORBITAL INTELLIGENCE
+        </h1>
+        <p className="text-[10px] text-sky-400 font-semibold tracking-wide">
+          Powered by <span className="text-slate-200">SENTINEL-X</span>
+        </p>
+      </div>
+    </div>
+    <span className="hidden xl:inline text-xs text-slate-400 border-l border-slate-700 pl-3 italic">
+      See the change. Understand the risk. Act before it escalates.
+    </span>
+  </div>
 
-        <form onSubmit={handleSearch} className="flex-1 max-w-xl mx-4">
-          <div className="relative">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search location..."
-              className="w-full bg-[#060e1a] border border-sky-500/50 rounded-lg pl-3 pr-10 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-sky-400 font-mono shadow-inner transition-colors truncate"
-            />
-            <button 
-              type="submit" 
-              disabled={isSearching}
-              className="absolute right-2 top-1.5 text-xs text-sky-400 hover:text-sky-300 font-bold px-1"
-            >
-              {isSearching ? '⏳' : '🔍'}
-            </button>
-          </div>
-        </form>
+  <form onSubmit={handleSearch} className="flex-1 max-w-xl mx-4">
+    <div className="relative">
+      <input
+        type="text"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        placeholder="Search location..."
+        className="w-full bg-[#060e1a] border border-sky-500/50 rounded-lg pl-3 pr-10 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-sky-400 font-mono shadow-inner transition-colors truncate"
+      />
+      <button 
+        type="submit" 
+        disabled={isSearching}
+        className="absolute right-2 top-1.5 text-xs text-sky-400 hover:text-sky-300 font-bold px-1"
+      >
+        {isSearching ? '⏳' : '🔍'}
+      </button>
+    </div>
+  </form>
 
-        <div className="flex items-center gap-3 border-l border-slate-800 pl-3">
-          <div className="w-7 h-7 rounded-full bg-sky-600 flex items-center justify-center text-xs font-bold text-white shadow-sm">
-            KB
-          </div>
-          <div className="hidden sm:block text-right">
-            <span className="text-xs font-bold text-slate-200 block leading-tight">Khuda Bux Mahar</span>
-            <span className="text-[10px] text-sky-400 font-medium block">Founder & Developer</span>
-          </div>
-        </div>
-      </header>
+  <div className="flex items-center gap-3 border-l border-slate-800 pl-3">
+    {/* 2. Khuda Bux Profile Picture */}
+    <img 
+      src="/profile.png" 
+      alt="Khuda Bux Mahar" 
+      className="w-8 h-8 rounded-full object-cover border border-sky-400/50 shadow-md"
+    />
+    <div className="hidden sm:block text-right">
+      <span className="text-xs font-bold text-slate-200 block leading-tight">Khuda Bux Mahar</span>
+      <span className="text-[10px] text-sky-400 font-medium block">Founder & Developer</span>
+    </div>
+  </div>
+</header>
 
       {/* Navigation */}
       <nav className="bg-[#081120] border-b border-slate-800/80 px-4 py-1.5 flex items-center justify-between gap-4 overflow-x-auto scrollbar-none text-xs shrink-0 z-40">
