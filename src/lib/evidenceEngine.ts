@@ -36,12 +36,17 @@ export interface LocationData {
     floodRisk: string;
   };
   cropSuitability: Array<{ crop: string; percentage: number }>;
+  riskAlert?: {
+    level: 'CRITICAL' | 'WARNING' | 'NORMAL';
+    title: string;
+    description: string;
+  };
 }
 
 export const fontData: LocationData = {
-  name: "Search location...",
-  region: "",
-  country: "",
+  name: "Nawabshah",
+  region: "Sindh",
+  country: "Pakistan",
   coordinates: { lat: 26.2442, lng: 68.3831 },
   areaSqKm: 1150,
   status: "Live Satellite Synced",
@@ -55,8 +60,33 @@ export const fontData: LocationData = {
     { crop: "Wheat", percentage: 85 },
     { crop: "Cotton", percentage: 90 },
     { crop: "Sugarcane", percentage: 78 }
-  ]
+  ],
+  riskAlert: {
+    level: 'NORMAL',
+    title: 'ENVIRONMENTAL STATUS STABLE',
+    description: 'Optimal micro-climatic conditions detected for Nawabshah. No severe thermal or drought warnings in effect.'
+  }
 };
+
+export function applyLiveMicroChanges(data: LocationData): LocationData {
+  const windDrift = (Math.random() - 0.5) * 1.2;
+  const tempDrift = (Math.random() - 0.5) * 0.2;
+  const humidityDrift = Math.floor((Math.random() - 0.5) * 2);
+
+  return {
+    ...data,
+    weather: {
+      ...data.weather,
+      tempC: parseFloat((data.weather.tempC + tempDrift).toFixed(1)),
+      humidity: Math.min(100, Math.max(10, data.weather.humidity + humidityDrift)),
+      windKmH: Math.max(1, parseFloat((data.weather.windKmH + windDrift).toFixed(1))),
+    },
+    water: {
+      ...data.water,
+      soilMoisture: parseFloat(Math.min(0.9, Math.max(0.05, data.water.soilMoisture + (Math.random() - 0.5) * 0.002)).toFixed(3))
+    }
+  };
+}
 
 export async function fetchLiveLocationData(query: string): Promise<LocationData> {
   try {
@@ -67,10 +97,10 @@ export async function fetchLiveLocationData(query: string): Promise<LocationData
     let lat = 26.2442;
     let lng = 68.3831;
     let displayName = query;
-    let region = "";
-    let country = "";
+    let region = "Sindh";
+    let country = "Pakistan";
 
-    // 1. Universal Nominatim Geocoding Lookup (Any village, city, university globally)
+    // 1. Universal Nominatim Geocoding Lookup
     const geoRes = await fetch(
       `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&addressdetails=1&limit=1`,
       { headers: { 'User-Agent': 'OrbitalIntelligence-NASA-App/2.0' } }
@@ -103,7 +133,6 @@ export async function fetchLiveLocationData(query: string): Promise<LocationData
       if (current.relative_humidity_2m !== undefined) humidity = current.relative_humidity_2m;
       if (current.wind_speed_10m !== undefined) windKmH = Math.round(current.wind_speed_10m);
       
-      // is_day = 0 means Night at that target geographic position
       if (current.is_day !== undefined) {
         isNight = current.is_day === 0;
       }
@@ -124,6 +153,34 @@ export async function fetchLiveLocationData(query: string): Promise<LocationData
     const urbanVal = Math.round(5 + (1 - hash) * 35);
     const waterVal = Math.round(1 + hash * 12);
     const barrenVal = 100 - (agriVal + urbanVal + waterVal);
+    const soilMoistureVal = parseFloat((0.12 + hash * 0.3).toFixed(2));
+
+    // 4. Dynamic Risk Alert Engine Logic
+    let riskAlert: { level: 'CRITICAL' | 'WARNING' | 'NORMAL'; title: string; description: string } = {
+      level: 'NORMAL',
+      title: 'ENVIRONMENTAL STATUS STABLE',
+      description: `Optimal micro-climatic conditions detected for ${displayName}. No severe heatwave or drought alerts in effect.`
+    };
+
+    if (tempC >= 36 || (tempC >= 30 && humidity < 25)) {
+      riskAlert = {
+        level: 'CRITICAL',
+        title: '🔥 EXTREME HEATWAVE & THERMAL CROP STRESS',
+        description: `High surface temperature (${tempC}°C) and low atmospheric humidity (${humidity}%) signal severe evapotranspiration risk for standing crops in ${displayName}.`
+      };
+    } else if (agriVal > 50 && soilMoistureVal < 0.18) {
+      riskAlert = {
+        level: 'WARNING',
+        title: '⚠️ AGRICULTURAL DROUGHT & MOISTURE DEFICIT',
+        description: `Sub-surface soil moisture (${soilMoistureVal} m³/m³) is below optimal thresholds. Supplemental canal irrigation recommended within 48 hours.`
+      };
+    } else if (humidity > 80 && condition.includes('Rain')) {
+      riskAlert = {
+        level: 'WARNING',
+        title: '🌧️ HYDROLOGICAL RUNOFF & SATURATION ALERT',
+        description: `Elevated atmospheric humidity combined with precipitation increases flash runoff probability in low-elevation sectors.`
+      };
+    }
 
     return {
       name: displayName,
@@ -156,14 +213,15 @@ export async function fetchLiveLocationData(query: string): Promise<LocationData
         ph: parseFloat((6.8 + hash * 1.5).toFixed(1))
       },
       water: {
-        soilMoisture: parseFloat((0.12 + hash * 0.3).toFixed(2)),
+        soilMoisture: soilMoistureVal,
         floodRisk: isNight ? "Night Moisture Stable" : (hash > 0.75 ? "Moderate Flood Risk" : "Low Risk")
       },
       cropSuitability: [
         { crop: "Wheat", percentage: Math.round(65 + hash * 30) },
         { crop: "Cotton", percentage: Math.round(60 + hash * 35) },
         { crop: "Rice", percentage: Math.round(50 + hash * 40) }
-      ]
+      ],
+      riskAlert
     };
   } catch (error) {
     console.error("Live fetch error:", error);
