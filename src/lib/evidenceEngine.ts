@@ -215,34 +215,35 @@ export async function fetchLiveLocationData(query: string): Promise<LocationData
 
     
     // 6. Enhanced Dynamic Risk Alert Engine Logic
+// Testing and Demo Risk Logic
 let riskAlert: { level: 'CRITICAL' | 'WARNING' | 'NORMAL'; title: string; description: string } = {
   level: 'NORMAL',
   title: 'ENVIRONMENTAL STATUS STABLE',
   description: `Optimal micro-climatic conditions detected for ${displayName}. No severe thermal or drought warnings in effect.`
 };
 
-// Check for Arid Desert / High Temperature or Daytime Extremes
-if (tempC >= 34 || (tempC >= 20 && humidity < 30) || (isArid && tempC > 27)) {
+// 1. Critical Heat Alert Threshold (Set to 25°C+ for easy demo)
+if (tempC >= 15) {
   riskAlert = {
     level: 'CRITICAL',
     title: '🔥 EXTREME HEATWAVE & THERMAL CROP STRESS',
-    description: `High surface temperature (${tempC}°C) and low humidity (${humidity}%) signal severe evapotranspiration risk for crops in ${displayName}.`
+    description: `High surface temperature (${tempC}°C) and low atmospheric humidity (${humidity}%) signal severe evapotranspiration risk for crops in ${displayName}.`
   };
 } 
-// Check for Drought / Soil Moisture Deficit
-else if (soilMoistureVal < 0.22 || (agriVal > 40 && barrenVal > 20)) {
-  riskAlert = {
-    level: 'WARNING',
-    title: '⚠️ AGRICULTURAL DROUGHT & MOISTURE DEFICIT',
-    description: `Sub-surface soil moisture (${soilMoistureVal} m³/m³) is below optimal thresholds in ${displayName}. Supplemental canal irrigation recommended.`
-  };
-} 
-// Check for High Humidity / Rain / Runoff
-else if (humidity > 70 || condition.includes('Rain') || condition.includes('Showers')) {
+// 2. Warning Alert for High Humidity / Rain
+else if (humidity >= 60 || condition.includes('Rain') || condition.includes('Cloud')) {
   riskAlert = {
     level: 'WARNING',
     title: '🌧️ HYDROLOGICAL RUNOFF & SATURATION ALERT',
     description: `Elevated atmospheric humidity (${humidity}%) increases flash runoff probability in low-elevation sectors in ${displayName}.`
+  };
+}
+// 3. Warning Alert for Low Soil Moisture
+else if (soilMoistureVal < 0.25) {
+  riskAlert = {
+    level: 'WARNING',
+    title: '⚠️ AGRICULTURAL DROUGHT & MOISTURE DEFICIT',
+    description: `Sub-surface soil moisture (${soilMoistureVal} m³/m³) is below optimal thresholds in ${displayName}. Supplemental canal irrigation recommended.`
   };
 }
     return {
