@@ -191,17 +191,18 @@ export default function MasterDashboard() {
                     ))}
                   </div>
 
-                  <div className="w-full flex-1 relative z-10 bg-slate-950">
-                    <iframe
-                      title="Sentinel-X Map Canvas"
-                      width="100%"
-                      height="100%"
-                      frameBorder="0"
-                      scrolling="no"
-                      src={`https://www.openstreetmap.org/export/embed.html?bbox=${locationData.coordinates.lng - 0.3}%2C${locationData.coordinates.lat - 0.3}%2C${locationData.coordinates.lng + 0.3}%2C${locationData.coordinates.lat + 0.3}&amp;layer=mapnik`}
-                      className="w-full h-full filter contrast-[1.1] brightness-[0.85] saturate-[1.2]"
-                    ></iframe>
-                  </div>
+                  {/* Dynamic Real Satellite Map with Marker */}
+<div className="w-full flex-1 relative z-10 bg-slate-950">
+  <iframe
+    title="Sentinel-X Satellite Canvas"
+    width="100%"
+    height="100%"
+    frameBorder="0"
+    scrolling="no"
+    src={`https://maps.google.com/maps?q=${locationData.coordinates.lat},${locationData.coordinates.lng}&z=13&t=k&output=embed`}
+    className="w-full h-full filter contrast-[1.05] brightness-[0.95]"
+  ></iframe>
+</div>
                 </div>
 
                 {/* Right Panel with Live Weather Metrics */}
