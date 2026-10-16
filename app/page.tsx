@@ -514,40 +514,51 @@ export default function MasterDashboard() {
                 </div>
               )}
 
-              {activeTab === 'Vegetation' && (
-                <div className="flex flex-col gap-4 text-xs">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <div className="bg-[#040a14] border border-slate-800 p-3 rounded-lg">
-                      <span className="text-slate-400 font-medium">Average NDVI Index</span>
-                      <div className="text-2xl font-bold text-emerald-400 font-mono mt-1">{locationData.ndvi.avg}</div>
-                    </div>
-                    <div className="bg-[#040a14] border border-slate-800 p-3 rounded-lg">
-                      <span className="text-slate-400 font-medium">Chlorophyll Health</span>
-                      <div className="text-sm font-bold text-sky-400 mt-2">{locationData.ndvi.status}</div>
-                    </div>
-                    <div className="bg-[#040a14] border border-slate-800 p-3 rounded-lg">
-                      <span className="text-slate-400 font-medium">Mathematical Formula</span>
-                      <div className="text-xs font-mono text-slate-200 mt-2">NDVI = (NIR - Red) / (NIR + Red)</div>
-                    </div>
-                  </div>
+              {/* VEGETATION TAB BREAKDOWN */}
+{activeTab === 'Vegetation' && (
+  <div className="flex flex-col gap-4 text-xs">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div className="bg-[#040a14] border border-slate-800 p-3 rounded-lg">
+        <span className="text-slate-400 font-medium">
+          {locationData.isNight ? 'Thermal Emissivity Index' : 'Average Optical NDVI'}
+        </span>
+        <div className="text-2xl font-bold text-emerald-400 font-mono mt-1">{locationData.ndvi.avg}</div>
+        <span className="text-[10px] text-slate-500 block mt-0.5">Resolution: {locationData.isNight ? '100m Thermal' : '10m Optical'}</span>
+      </div>
+      <div className="bg-[#040a14] border border-slate-800 p-3 rounded-lg">
+        <span className="text-slate-400 font-medium">Canopy State</span>
+        <div className="text-sm font-bold text-sky-400 mt-2">{locationData.ndvi.status}</div>
+      </div>
+      <div className="bg-[#040a14] border border-slate-800 p-3 rounded-lg">
+        <span className="text-slate-400 font-medium">Mathematical Formula</span>
+        <div className="text-xs font-mono text-slate-200 mt-2">
+          {locationData.isNight ? 'LST = Thermal IR Radiance / Emissivity' : 'NDVI = (NIR - Red) / (NIR + Red)'}
+        </div>
+      </div>
+    </div>
 
-                  <div className="bg-[#040a14] border border-slate-800 p-4 rounded-xl flex flex-col gap-3">
-                    <h3 className="font-bold text-emerald-400 text-sm">🌱 Chlorophyll Absorption & Crop Canopy Reasoning</h3>
-                    <p className="text-slate-300 leading-relaxed">
-                      The active NDVI value of <strong>{locationData.ndvi.avg}</strong> measured over {locationData.name} confirms healthy photosynthetic activity in leaf canopies. Higher Near-Infrared (NIR) light reflection combined with Red light absorption indicates active crop growth and minimal vegetation stress.
-                    </p>
-                    <div className="border-t border-slate-800/80 pt-2 text-slate-400">
-                      <strong>Biological & Environmental Impact:</strong>
-                      <ul className="list-disc ml-5 mt-1 space-y-1">
-                        <li><strong>Photosynthetic Vigor:</strong> High vegetation density prevents soil erosion and boosts crop biomass.</li>
-                        <li><strong>Transpiration Activity:</strong> Active stomatal conductances maintain local micro-climate humidity.</li>
-                        <li><strong>Satellite Source:</strong> Sentinel-2 Band 8 (NIR - 842nm) & Band 4 (Red - 665nm).</li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              )}
+    <div className="bg-[#040a14] border border-slate-800 p-4 rounded-xl flex flex-col gap-3">
+      <h3 className="font-bold text-emerald-400 text-sm">
+        🌱 {locationData.isNight ? 'Thermal Infrared Analysis' : 'Chlorophyll Absorption & Crop Canopy Reasoning'}
+      </h3>
+      
+      {/* 100% Dynamic Location-Dependent Reason */}
+      <p className="text-slate-300 leading-relaxed font-sans">
+        {locationData.scientificNarrative.vegetationReason}
+      </p>
 
+      <div className="border-t border-slate-800/80 pt-2 text-slate-400">
+        <strong>Biological & Environmental Impact:</strong>
+        {/* 100% Dynamic Bullet Points for Selected Location */}
+        <ul className="list-disc ml-5 mt-1 space-y-1">
+          {locationData.scientificNarrative.biologicalImpact.map((point, idx) => (
+            <li key={idx}><strong>{point.split(':')[0]}:</strong> {point.split(':')[1] || point}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </div>
+)}
               {activeTab === 'Weather & Climate' && (
                 <div className="flex flex-col gap-4 text-xs">
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-3">

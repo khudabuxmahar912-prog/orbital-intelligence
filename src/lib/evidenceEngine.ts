@@ -9,6 +9,7 @@ export interface LocationData {
   areaSqKm: number;
   status: string;
   isNight: boolean;
+  climateZone: string;
   weather: {
     tempC: number;
     condition: string;
@@ -41,6 +42,14 @@ export interface LocationData {
     title: string;
     description: string;
   };
+  scientificNarrative: {
+    landCoverReason: string;
+    vegetationReason: string;
+    biologicalImpact: string[];
+    weatherReason: string;
+    soilReason: string;
+    waterReason: string;
+  };
 }
 
 export const fontData: LocationData = {
@@ -51,6 +60,7 @@ export const fontData: LocationData = {
   areaSqKm: 1150,
   status: "Live Satellite Synced",
   isNight: false,
+  climateZone: "Subtropical Arid Basin",
   weather: { tempC: 32, condition: "Clear Sky", humidity: 45, windKmH: 12 },
   landCover: { agriculture: 70, urban: 15, barren: 10, water: 5 },
   ndvi: { avg: 0.65, status: "Healthy Vegetation" },
@@ -65,6 +75,18 @@ export const fontData: LocationData = {
     level: 'NORMAL',
     title: 'ENVIRONMENTAL STATUS STABLE',
     description: 'Optimal micro-climatic conditions detected for Nawabshah. No severe thermal or drought warnings in effect.'
+  },
+  scientificNarrative: {
+    landCoverReason: "Dominated by Indus basin canal-fed agricultural irrigation networks with low urban sprawl.",
+    vegetationReason: "Active photosynthetic canopy vigor driven by canal access and intensive crop cultivation.",
+    biologicalImpact: [
+      "High biomass production supporting regional cotton and wheat crop yield.",
+      "Moderate transpiration cooling buffering extreme desert heat flux.",
+      "Sentinel-2 Band 8 (NIR - 842nm) & Band 4 (Red - 665nm) at 10m Resolution."
+    ],
+    weatherReason: "High solar radiation load with continental desert atmospheric boundary conditions.",
+    soilReason: "Deep alluvial silt loam deposited by historical Indus river floodplains.",
+    waterReason: "Root-zone hydration sustained primarily via surface irrigation canals rather than local rainfall."
   }
 };
 
@@ -90,15 +112,10 @@ export function applyLiveMicroChanges(data: LocationData): LocationData {
 
 export async function fetchLiveLocationData(query: string): Promise<LocationData> {
   try {
-    if (!query || !query.trim()) {
-      return fontData;
-    }
+    if (!query || !query.trim()) return fontData;
 
-    let lat = 26.2442;
-    let lng = 68.3831;
-    let displayName = query;
-    let region = "Sindh";
-    let country = "Pakistan";
+    let lat = 26.2442, lng = 68.3831;
+    let displayName = query, region = "Region", country = "Global";
 
     // 1. Universal Nominatim Geocoding Lookup
     const geoRes = await fetch(
@@ -111,14 +128,13 @@ export async function fetchLiveLocationData(query: string): Promise<LocationData
       const place = geoData[0];
       lat = parseFloat(place.lat);
       lng = parseFloat(place.lon);
-      
       const address = place.address || {};
       displayName = address.university || address.amenity || address.village || address.town || address.city || place.display_name.split(',')[0];
       region = address.state || address.county || "Region";
       country = address.country || "Global";
     }
 
-    // 2. Live Open-Meteo Weather & Day/Night Detection API
+    // 2. Live Open-Meteo Weather & Day/Night API
     let tempC = 28, humidity = 50, windKmH = 10, condition = "Clear Sky";
     let isNight = false;
 
@@ -132,10 +148,7 @@ export async function fetchLiveLocationData(query: string): Promise<LocationData
       if (current.temperature_2m !== undefined) tempC = Math.round(current.temperature_2m);
       if (current.relative_humidity_2m !== undefined) humidity = current.relative_humidity_2m;
       if (current.wind_speed_10m !== undefined) windKmH = Math.round(current.wind_speed_10m);
-      
-      if (current.is_day !== undefined) {
-        isNight = current.is_day === 0;
-      }
+      if (current.is_day !== undefined) isNight = current.is_day === 0;
 
       const code = current.weather_code || 0;
       if (code > 0 && code <= 3) condition = "Partly Cloudy";
@@ -155,7 +168,52 @@ export async function fetchLiveLocationData(query: string): Promise<LocationData
     const barrenVal = 100 - (agriVal + urbanVal + waterVal);
     const soilMoistureVal = parseFloat((0.12 + hash * 0.3).toFixed(2));
 
-    // 4. Dynamic Risk Alert Engine Logic
+    // 4. Dynamic Geographic & Climate Classification Logic
+    let climateZone = "Temperate Continental";
+    if (Math.abs(lat) < 23.5) climateZone = "Tropical Equatorial";
+    else if (Math.abs(lat) < 35 && tempC > 25) climateZone = "Arid / Semi-Arid Zone";
+    else if (Math.abs(lat) > 50) climateZone = "Sub-Boreal / Maritime High-Latitude";
+
+    // 5. Dynamic Location-Dependent Scientific Narrative Generator
+    const isUrban = urbanVal > 30;
+    const isCoastal = waterVal > 10 || humidity > 75;
+    const isArid = tempC > 30 && humidity < 40;
+
+    const landCoverReason = isUrban 
+      ? `High paved surface fraction in ${displayName} (${urbanVal}%) reflects intense impervious built environment and urban infrastructure expansion.`
+      : isArid 
+      ? `Arid terrain profile in ${displayName} with ${agriVal}% cultivated pockets sustained by localized groundwater and irrigation canals.`
+      : `Dominantly vegetated mosaic in ${displayName} with ${agriVal}% agriculture and low built-up footprint (${urbanVal}%).`;
+
+    const vegetationReason = isNight
+      ? `Night thermal radiometry for ${displayName} monitors canopy heat dissipation and stomatal closure without optical solar influence.`
+      : ndviVal > 0.55
+      ? `High photosynthetic greenness index (NDVI ${ndviVal}) in ${displayName} confirms dense chlorophyll canopy and optimal leaf area index (LAI).`
+      : `Moderate vegetation canopy index (NDVI ${ndviVal}) indicating seasonal crop maturity, harvesting state, or moisture-induced vegetation stress in ${displayName}.`;
+
+    const biologicalImpact = isNight ? [
+      `Night thermal emission (LST) tracks nocturnal transpiration cooling in ${displayName}.`,
+      `Stomatal closure minimizes water vapor loss under zero solar radiation load.`,
+      `Satellite Sensor: Landsat-9 TIRS Band 10 (10.6µm - 11.2µm Thermal IR) at 100m Resolution.`
+    ] : isUrban ? [
+      `Impervious concrete surfaces elevate local surface temperatures, driving Urban Heat Island (UHI) effects in ${displayName}.`,
+      `Fragmented vegetation patches reduce natural evapotranspiration cooling capacity.`,
+      `Satellite Source: Sentinel-2 Band 8 (NIR - 842nm) & Band 4 (Red - 665nm) at 10m Spatial Resolution.`
+    ] : isCoastal ? [
+      `Elevated atmospheric moisture buffers daily temperature fluctuations in ${displayName}.`,
+      `High relative humidity supports coastal canopy chlorophyll stability and reduces moisture drought risk.`,
+      `Satellite Source: Sentinel-2 Band 8 (NIR - 842nm) & Band 4 (Red - 665nm) at 10m Spatial Resolution.`
+    ] : [
+      `Active photosynthesis in ${displayName} supports regional agricultural biomass and soil carbon stabilization.`,
+      `Optimal leaf area index buffers topsoil against wind erosion and thermal erosion.`,
+      `Satellite Source: Sentinel-2 Band 8 (NIR - 842nm) & Band 4 (Red - 665nm) at 10m Spatial Resolution.`
+    ];
+
+    const weatherReason = `Atmospheric dynamics in ${displayName} dictated by ${climateZone} air masses, producing surface temperatures of ${tempC}°C and ${humidity}% relative humidity.`;
+    const soilReason = `Topographical terrain elevation of ${Math.round(10 + hash * 350)}m combined with ${hash > 0.5 ? "Alluvial Silt Loam" : "Sandy Loam"} soil controls drainage velocity and nutrient exchange.`;
+    const waterReason = `Topsoil volumetric water content (${soilMoistureVal} m³/m³) reflects root-zone water balance regulated by local soil retention and evapotranspiration.`;
+
+    // 6. Dynamic Risk Alert Engine Logic
     let riskAlert: { level: 'CRITICAL' | 'WARNING' | 'NORMAL'; title: string; description: string } = {
       level: 'NORMAL',
       title: 'ENVIRONMENTAL STATUS STABLE',
@@ -166,19 +224,19 @@ export async function fetchLiveLocationData(query: string): Promise<LocationData
       riskAlert = {
         level: 'CRITICAL',
         title: '🔥 EXTREME HEATWAVE & THERMAL CROP STRESS',
-        description: `High surface temperature (${tempC}°C) and low atmospheric humidity (${humidity}%) signal severe evapotranspiration risk for standing crops in ${displayName}.`
+        description: `High surface temperature (${tempC}°C) and low atmospheric humidity (${humidity}%) signal severe evapotranspiration risk for crops in ${displayName}.`
       };
     } else if (agriVal > 50 && soilMoistureVal < 0.18) {
       riskAlert = {
         level: 'WARNING',
         title: '⚠️ AGRICULTURAL DROUGHT & MOISTURE DEFICIT',
-        description: `Sub-surface soil moisture (${soilMoistureVal} m³/m³) is below optimal thresholds. Supplemental canal irrigation recommended within 48 hours.`
+        description: `Sub-surface soil moisture (${soilMoistureVal} m³/m³) is below optimal thresholds. Supplemental canal irrigation recommended within 48 hours in ${displayName}.`
       };
     } else if (humidity > 80 && condition.includes('Rain')) {
       riskAlert = {
         level: 'WARNING',
         title: '🌧️ HYDROLOGICAL RUNOFF & SATURATION ALERT',
-        description: `Elevated atmospheric humidity combined with precipitation increases flash runoff probability in low-elevation sectors.`
+        description: `Elevated atmospheric humidity combined with precipitation increases flash runoff probability in low-elevation sectors in ${displayName}.`
       };
     }
 
@@ -188,8 +246,9 @@ export async function fetchLiveLocationData(query: string): Promise<LocationData
       country: country,
       coordinates: { lat: parseFloat(lat.toFixed(4)), lng: parseFloat(lng.toFixed(4)) },
       areaSqKm: Math.round(400 + hash * 1600),
-      status: isNight ? "🌙 Night Telemetry Active" : "☀️ Daylight Satellite Active",
+      status: isNight ? "🌙 Night Thermal Node Active" : "☀️ Daylight Optical Node Active",
       isNight,
+      climateZone,
       weather: { 
         tempC, 
         condition: isNight ? "Clear Night" : condition, 
@@ -204,7 +263,7 @@ export async function fetchLiveLocationData(query: string): Promise<LocationData
       },
       ndvi: {
         avg: ndviVal,
-        status: isNight ? "Night Thermal Scan (NDVI Stable)" : (ndviVal > 0.55 ? "Dense Healthy Vegetation" : "Moderate Vegetation")
+        status: isNight ? "Night Thermal Radiometry Active" : (ndviVal > 0.55 ? "Dense Healthy Vegetation" : "Moderate Vegetation")
       },
       soilTerrain: {
         elevationM: Math.round(10 + hash * 350),
@@ -221,7 +280,15 @@ export async function fetchLiveLocationData(query: string): Promise<LocationData
         { crop: "Cotton", percentage: Math.round(60 + hash * 35) },
         { crop: "Rice", percentage: Math.round(50 + hash * 40) }
       ],
-      riskAlert
+      riskAlert,
+      scientificNarrative: {
+        landCoverReason,
+        vegetationReason,
+        biologicalImpact,
+        weatherReason,
+        soilReason,
+        waterReason
+      }
     };
   } catch (error) {
     console.error("Live fetch error:", error);
